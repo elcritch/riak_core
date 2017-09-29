@@ -21,6 +21,9 @@
 %% @doc send a partition's data via TCP-based handoff
 
 -module(riak_core_handoff_sender).
+
+-compile(nowarn_deprecated_function).
+
 -export([start_link/4, get_handoff_ssl_options/0]).
 -include("riak_core_vnode.hrl").
 -include("riak_core_handoff.hrl").

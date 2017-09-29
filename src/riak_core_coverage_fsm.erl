@@ -66,6 +66,8 @@
 
 -include("riak_core_vnode.hrl").
 
+-compile(nowarn_deprecated_function).
+
 -behaviour(gen_fsm).
 
 %% API
@@ -199,7 +201,7 @@ init([Mod,
     %% that modules with riak_core_coverage_fsm behaviour now return a
     %% coverage plan function rather than a module.  The four
     %% core_coverage_fsm modules used regularly in RiakTS have all
-    %% been changed to return functions.  
+    %% been changed to return functions.
     %%
     %% However, to ensure backwards compatibility with any modules
     %% that may have been missed, we add a check here in case someone
@@ -207,7 +209,7 @@ init([Mod,
     %% the coverage plan module to the appropriate function for use
     %% further down the stack
 
-    CoveragePlanFn = 
+    CoveragePlanFn =
         case is_atom(CoveragePlanRet) of
             true ->
                 fun CoveragePlanRet:create_plan/6;
@@ -383,7 +385,7 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 %% 30% of the query-path time for small queries
 %%
 %% Instead we try Mod:plan/2, if undef, we define it.  On success or
-%% match error on atoms, we pass on Mod:plan/2 
+%% match error on atoms, we pass on Mod:plan/2
 
 plan_callback(Mod) ->
     SuccessFun = fun(CoverageVNodes, ModState) ->

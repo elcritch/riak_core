@@ -22,6 +22,9 @@
 
 -module(riak_core_handoff_receiver).
 -include("riak_core_handoff.hrl").
+
+-compile(nowarn_deprecated_function).
+
 -behaviour(riak_core_gen_server).
 -export([start_link/0,                          % Don't use SSL
          start_link/1,                          % SSL options list, empty=no SSL

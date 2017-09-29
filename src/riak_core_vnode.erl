@@ -18,6 +18,9 @@
 %% -------------------------------------------------------------------
 -module('riak_core_vnode').
 -behaviour(gen_fsm).
+
+-compile(nowarn_deprecated_function).
+
 -include("riak_core_vnode.hrl").
 -export([start_link/3,
          start_link/4,

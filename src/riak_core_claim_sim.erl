@@ -25,6 +25,8 @@
 -module(riak_core_claim_sim).
 -compile(export_all).
 
+-compile(nowarn_export_all).
+
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
@@ -96,24 +98,24 @@ run(Opts) ->
     Claimant = proplists:get_value(claimant, Opts),
     RingFile = proplists:get_value(ringfile, Opts),
     RingArg = proplists:get_value(ring, Opts),
-    
+
     AppVars = proplists:get_value(riak_core, Opts, []),
     setup_environment(AppVars),
-               
-    Wants = proplists:get_value(wants, Opts, 
+
+    Wants = proplists:get_value(wants, Opts,
                                 app_helper:get_env(riak_core, wants_claim_fun)),
-    Choose = proplists:get_value(choose, 
+    Choose = proplists:get_value(choose,
                                  Opts, app_helper:get_env(riak_core, choose_claim_fun)),
-    
+
     Prepare = proplists:get_value(prepare, Opts, finish),
     Cmds = proplists:get_value(cmds, Opts, []),
     IoDev = proplists:get_value(print, Opts, standard_io),
     Analysis = proplists:get_value(analysis, Opts, []),
     ReturnRing = proplists:get_value(return_ring, Opts, false),
-    
+
     TN0 = proplists:get_value(target_n_val, Opts, app_helper:get_env(riak_core, target_n_val)),
 
-    {Ring, TN} = 
+    {Ring, TN} =
         case {Claimant, RingFile, RingArg} of
             {undefined, undefined, undefined} ->
                 {ok, Ring0} = riak_core_ring_manager:get_raw_ring(),
@@ -134,9 +136,9 @@ run(Opts) ->
     Choose1 = add_choose_params(Choose, TN),
 
     SimOpts0 = default_simopts(IoDev, Analysis, TN),
-    SimOpts = SimOpts0#simopts{wants = Wants, choose = Choose1, 
+    SimOpts = SimOpts0#simopts{wants = Wants, choose = Choose1,
                                prepare = Prepare, return_ring = ReturnRing},
-    
+
     dryrun(Ring, Cmds, SimOpts).
 
 add_choose_params(Choose, TN) ->
@@ -168,7 +170,7 @@ setup_environment(Vars) ->
 
 %% Perform the dry run, if printing is disabled, return the ring
 dryrun(Ring, CmdsL0, SimOpts) ->
-    CmdsL = case CmdsL0 of 
+    CmdsL = case CmdsL0 of
                 [Cmd0|_] when not is_list(Cmd0) ->
                     [[Cmd] || Cmd <- CmdsL0];
                 _ ->
@@ -216,7 +218,7 @@ make_percmd(IoDev) ->
                     o(IoDev, "Leaving ~p~n", [Node])
             end
     end.
-   
+
 make_rebalance(false, _TN) ->
     fun(_R1, _R2) -> ok end;
 make_rebalance(IoDev, TN) ->
@@ -277,7 +279,7 @@ dryrun1(Ring00, CmdsL, #simopts{wants = Wants,
 
     Prepared(Ring01, Prepare),
     Ring0 = run_rebalance(Ring01, Wants, Choose, Rebalance),
-    
+
     lists:foldl(
       fun(Cmds, RingAcc1) ->
               NewRing =
@@ -305,7 +307,7 @@ dryrun1(Ring00, CmdsL, #simopts{wants = Wants,
 
 sim_node(N) ->
     list_to_atom(lists:flatten(io_lib:format("sim~b@127.0.0.1",[N]))).
-    
+
 command({join, Num}, Ring) when is_integer(Num) ->
     command({join, 1, Num}, Ring);
 command({join, Start, End}, Ring) ->
@@ -384,7 +386,7 @@ commission(Base, Test) ->
 commission(Base, Test, Claims) when is_list(Claims) ->
     [try
          commission(Base, Test, Claim)
-     catch 
+     catch
          _:Err ->
              io:format("~p / ~p failed - ~p\n", [Test, Claim, Err]),
              Err
@@ -394,9 +396,9 @@ commission(Base, Test, {Wants, Choose}) ->
     Nodes = proplists:get_value(nodes, Test, 16),
     NVal = proplists:get_value(n_val, Test, 3),
     TN = proplists:get_value(target_n_val, Test, 4),
-    
+
     Ring = riak_core_ring:fresh(RingSize, sim_node(1)),
-    
+
     SeqJoinCmds = [ [{join, sim_node(I)}] || I <- lists:seq(2, Nodes)],
     BulkJoinCmds =  [ [ {join, sim_node(I)} || I <- lists:seq(2, Nodes) ] ],
 
@@ -407,7 +409,7 @@ commission(Base, Test, {Wants, Choose}) ->
         _ ->
             ok
     end,
-    
+
     ok = filelib:ensure_dir(filename:join(Dir, empty)),
 
     {ok, SeqFh} = file:open(filename:join([Dir, "sequential.txt"]), [write]),
@@ -421,11 +423,11 @@ commission(Base, Test, {Wants, Choose}) ->
     SeqSimOpts = #simopts{
       wants = Wants,
       choose = Choose1,
-      analysis = 
+      analysis =
           fun(Ring2, Cmds) ->
                   Seq = get(sim_seq),
                   put(sim_seq, Seq+1),
-                  FN = filename:join([Dir, 
+                  FN = filename:join([Dir,
                                       "sj"++integer_to_list(Seq)++".ring" ]),
                   ok = file:write_file(FN, term_to_binary(Ring2)),
 
@@ -456,11 +458,11 @@ commission(Base, Test, {Wants, Choose}) ->
     BulkSimOpts = #simopts{
       wants = Wants,
       choose = Choose,
-      analysis = 
+      analysis =
           fun(Ring2, Cmds) ->
                   Seq = get(sim_seq),
                   put(sim_seq, Seq+1),
-                  FN = filename:join([Dir, 
+                  FN = filename:join([Dir,
                                       "bk"++integer_to_list(Nodes)++".ring" ]),
                   ok = file:write_file(FN, term_to_binary(Ring2)),
 
@@ -483,7 +485,7 @@ commission(Base, Test, {Wants, Choose}) ->
 
 commission_test_dir(Base, RingSize, Nodes, NVal, TN, {_Mod, Choose}) ->
     filename:join(Base,
-                  lists:flatten(io_lib:format("q~b_s~b_n~b_t~b_~p", 
+                  lists:flatten(io_lib:format("q~b_s~b_n~b_t~b_~p",
                                               [RingSize, Nodes, NVal, TN,
                                                Choose]))).
 
@@ -510,7 +512,7 @@ commission_tests_first() ->
 commission_tests_rest() ->
     [[{n_val, NVal}, {target_n_val, NVal+TNDelta}, {nodes, min(Q, 64)}, {ring_size, Q}] ||
         Q <- [64, 256, 1024, 32, 128, 512, 2048, 4096, 8192, 16384],
-        NVal <- lists:seq(1, 9), 
+        NVal <- lists:seq(1, 9),
         TNDelta <- lists:seq(0, 3)
         ].
 
@@ -558,14 +560,14 @@ run_test() ->
 %% Decided not to run by default, perhaps better as an
 %% integration test.
 commission_test_no_longer_run_by_default() ->
-    {timeout, 120, 
+    {timeout, 120,
      ?_test(begin
                 Dir = "commission_test",
                 os:cmd("rm -rf " ++ Dir),
                 filelib:ensure_dir(filename:join([Dir, "empty"])),
                 Claims = commission_claims(),
                 [ok] = lists:usort(commission(Dir,
-                                              [{n_val, 3}, {target_n, 4}, 
+                                              [{n_val, 3}, {target_n, 4},
                                                {nodes, 5}, {ring_size, 64}],
                                               Claims)),
                 %% Check each claim has a sequential and bulk file written
@@ -576,7 +578,7 @@ commission_test_no_longer_run_by_default() ->
                      ?assert(filelib:is_file(filename:join(TD, "sj5.ring"))),
                      ?assert(filelib:is_file(filename:join(TD, "bulk.txt"))),
                      ?assert(filelib:is_file(filename:join(TD, "bk5.ring")))
-                 end|| 
+                 end||
                     {_Want, Choose} <- Claims]
             end)}.
 

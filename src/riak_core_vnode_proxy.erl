@@ -17,6 +17,9 @@
 %%
 %% -------------------------------------------------------------------
 -module(riak_core_vnode_proxy).
+
+-compile(nowarn_deprecated_function).
+
 -export([start_link/2, init/1, reg_name/2, reg_name/3, call/2, call/3, cast/2,
          unregister_vnode/3, command_return_vnode/2, overloaded/1]).
 -export([system_continue/3, system_terminate/4, system_code_change/4]).

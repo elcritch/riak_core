@@ -21,6 +21,8 @@
 
 -behaviour(gen_fsm).
 
+-compile(nowarn_deprecated_function).
+
 %% API
 -export([start/2]).
 

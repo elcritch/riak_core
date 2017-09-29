@@ -41,6 +41,8 @@
 
 -behaviour(gen_fsm).
 
+-compile(nowarn_deprecated_function).
+
 %% gen_fsm callbacks
 -export([init/1, handle_event/3, handle_sync_event/4, handle_info/3,
         terminate/3, code_change/4]).
@@ -224,7 +226,7 @@ handle_info({'DOWN', _Ref, _, Pid, Info}, StateName, #state{monitors=Monitors} =
     end;
 handle_info(shutdown, shutdown, #state{monitors=Monitors} = State) ->
     %% we've waited too long to shutdown, time to force the issue.
-    _ = [riak_core_vnode:reply(From, {error, vnode_shutdown}) || 
+    _ = [riak_core_vnode:reply(From, {error, vnode_shutdown}) ||
             {_, _, From, _} <- Monitors],
     {stop, shutdown, State};
 handle_info(_Info, StateName, State) ->
@@ -288,4 +290,3 @@ new(#state{queue_strategy = fifo}) ->
     queue:new();
 new(#state{queue_strategy = filo}) ->
     [].
-

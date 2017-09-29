@@ -24,6 +24,9 @@
 
 -module(riak_core_vnode_master).
 -include("riak_core_vnode.hrl").
+
+-compile(nowarn_deprecated_function).
+
 -behaviour(gen_server).
 -export([start_link/1, start_link/2, start_link/3, get_vnode_pid/2,
          start_vnode/2,
@@ -105,14 +108,14 @@ coverage(Msg, CoverageVNodes, Keyspaces, {Type, Ref, From}, VMaster)
   when is_list(CoverageVNodes) ->
     [proxy_cast({VMaster, Node},
                 make_coverage_request(Msg,
-                                      Keyspaces, 
+                                      Keyspaces,
                                       {Type, {Ref, {Index, Node}}, From},
                                       Index)) ||
         {Index, Node} <- CoverageVNodes];
 coverage(Msg, {Index, Node}, Keyspaces, Sender, VMaster) ->
     proxy_cast({VMaster, Node},
                make_coverage_request(Msg, Keyspaces, Sender, Index)).
-    
+
 %% Send the command to an individual Index/Node combination, but also
 %% return the pid for the vnode handling the request, as `{ok,
 %% VnodePid}'.
